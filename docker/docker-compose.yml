@@ -1,0 +1,35 @@
+version: '3.1'
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: 'web-nginx'
+    working_dir: /var/www/web
+    volumes:
+      - ../web:/var/www/web
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf 
+    ports:
+      - '3000:80'
+    links:
+      - sic-db
+      - php-fpm
+
+  php-fpm:
+    build: ./php-fpm
+    container_name: php-fpm
+    working_dir: /var/www/web
+    volumes:
+    - ../web:/var/www/web
+    - ./php-fpm/php-ini-overrides.ini:/etc/php/7.4/fpm/conf.d/99-overrides.ini
+
+  sic-db:
+    build: ./database
+    container_name: sic-db
+    restart: always
+    environment:
+      POSTGRES_DB: sic-db
+      POSTGRES_USER: joao
+      POSTGRES_PASSWORD: joao123
+      PGDATA: /var/lib/postgresql/data/pgdata
+  
+    ports:    
+      - '5000:5432'
